@@ -1,0 +1,29 @@
+services:
+
+  app:
+    build: .
+    ports:
+      - "4567:4567"
+    env_file: .env
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: on-failure
+
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: myapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
